@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Average App - Planlodge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="shortcut icon" type="image/png" href="http://pngimg.com/upload/small/apple_PNG12458.png">
+    <!--Import Google Icon Font-->
+    <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+<body data-ng-app="StudentApp" ng-controller="StudentController" ng-cloak>
+
+<div class="row wrapper">
+    <div class="col s12 m10 maxer">
+
+        <h1>Student Roster</h1>
+
+        <!-- normal buttons -->
+        <div class="row">
+            <div class="col s12">
+
+                <a class="waves-effect waves-light btn modal-trigger" href="#add"><i class="material-icons left">add</i>Add Student</a>
+                <a class="waves-effect waves-light btn modal-trigger" ng-class="studentList.length < 1 ? 'disabled' : ''" href="#clear"><i class="material-icons left">replay</i>Clear Students</a>
+                <a class="waves-effect waves-light btn modal-trigger" ng-class="studentList.length < 1 ? 'disabled' : ''" href="#downloadList">
+                    <i class="material-icons left">open_in_browser</i>
+                        Full Roster
+                </a>
+                <a class="waves-effect waves-light btn modal-trigger" ng-click="classAverage()" ng-class="studentList.length < 1 ? 'disabled' : ''" href="#classAverage">
+                    <i class="material-icons left">open_in_browser</i>
+                        Class Average
+                </a>
+            </div>
+        </div>
+
+        <!-- floating vertical action button -->
+        <div class="row">
+            <div class="col s12">
+
+                <div id="new" class="fixed-action-btn" style="top: 45px; right: 24px;">
+                    <a class="btn-floating btn-large red">
+                        <i class="large material-icons">settings</i>
+                    </a>
+                    <ul style="top: 85px; right: 0;">
+                        <li>
+                            <a class="btn-floating red tooltipped" data-position="left" data-delay="10" data-tooltip="Show/Hide Search Bar" ng-click="hideSearch()">
+                                <i class="material-icons">insert_chart</i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- basic modal -->
+        <!-- Modal Structure -->
+        <div id="add" class="modal">
+            <div class="modal-content">
+                <h4>Add A New Student</h4>
+                <p>Add a new student below.</p>
+
+                <div class="row">
+                    <form class="col s12">
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <i class="material-icons prefix">account_circle</i>
+                                <input placeholder="Placeholder" id="first_name" type="text" ng-model="newStudent.first" class="validate">
+                                <label for="first_name">First Name</label>
+                            </div>
+                            <div class="input-field col s12">
+                                <i class="material-icons prefix">account_circle</i>
+                                <input id="last_name" type="text" class="validate" ng-model="newStudent.last">
+                                <label for="last_name">Last Name</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <i class="material-icons prefix">mode_edit</i>
+                                <textarea id="icon_prefix2" class="materialize-textarea" length="120" ng-model="newStudent.memo"></textarea>
+                                <label for="icon_prefix2">Message</label>
+                            </div>
+
+                                <input type="hidden" ng-model="newStudent.tests" />
+                        </div>
+
+                    </form>
+                </div>
+
+                <div ng-if="testHolder.length>0"><h4>Test Scores:</h4></div>
+                <div ng-repeat="test in testHolder">
+                    <div class="row col s12 m12">
+                        <div class="input-field col s4 m4">
+                            <input placeholder="Test Score #{{$index + 1}}" ng-model="test.test_score" id="test_score" type="text" class="validate">
+                        </div>
+                        <div class="col s4 m4">
+                            <br />
+                            <a ng-show="$last" class="waves-effect waves-light btn" ng-click="removeScore()"><i class="material-icons medium">delete</i></a>
+                        </div>
+                    </div>
+                </div>
+                <a class="waves-effect waves-light btn" ng-click="addNewScore()"><i class="material-icons medium">add</i></a>
+
+            </div>
+            <div class="modal-footer">
+                <a href="#" class=" modal-action modal-close waves-effect waves-green btn-flat" ng-click="addStudent(newStudent)">Add</a>
+                <a href="#" class=" modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+            </div>
+        </div>
+
+        <!-- basic modal -->
+        <!-- Modal Structure -->
+        <div id="clear" class="modal">
+            <div class="modal-content">
+                <h4>Clear Student List</h4>
+                <p>Are you sure you want to clear student list? This cannot be undone.</p>
+
+            </div>
+            <div class="modal-footer">
+                <a href="#" class=" modal-action modal-close waves-effect waves-green btn-flat" ng-click="clearStudents()">Clear</a>
+                <a href="#" class=" modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+            </div>
+        </div>
+
+        <!-- basic modal -->
+        <!-- Modal Structure -->
+        <div id="downloadList" class="modal">
+            <div class="modal-content">
+                <h4>Full Roster</h4>
+                <ul>
+                    <li ng-repeat="student in studentList">{{student.first}} {{student.last}}</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+            </div>
+        </div>
+
+        <!-- basic modal -->
+        <!-- Modal Structure -->
+        <div id="classAverage" class="modal">
+            <div class="modal-content">
+                <h4>Class Average</h4>
+                <p>Total Class Average.</p>
+                <h4>{{classAverageTotal}}</h4>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class=" modal-action modal-close waves-effect waves-green btn-flat"">Okay</a>
+            </div>
+        </div>
+
+        <!-- striped and responsive table -->
+        <div class="row">
+            <div class="col s12">
+
+                <blockquote> <p> Total:
+                    <span ng-if="studentCount == 0">No Students</span>
+                    <span ng-if="studentCount == 1">{{studentCount}} Student</span>
+                    <span ng-if="studentCount > 1">{{studentCount}} Students</span>
+                    </p>
+                </blockquote>
+
+                <div ng-show="searchShow" class="input-field col s12">
+                    <input placeholder="Search Students..." id="" type="text" ng-model="search" class="validate">
+                </div>
+
+                <table class="highlight responsive-table">
+                    <thead>
+                    <tr>
+                        <th data-field="id">ID</th>
+                        <th data-field="id">Name</th>
+                        <th data-field="price">Notes</th>
+                        <th data-field="price">Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr ng-repeat="student in studentListFilter = (studentList | filter :search)">
+                            <td>{{$index + 1}}</td>
+                            <td>{{student.first}} {{student.last}}</td>
+                            <td>
+                                <span ng-hide="student.editing" ng-dblclick="editStudent(student)">{{student.memo}}</span>
+                                <span><input ng-show="student.editing" ng-model="student.memo" ng-blur="doneEditing(student)" autofocus /></span>
+                            </td>
+                            <td>
+                                <a class="btn" ng-click="removeStudent($index, student)">
+                                    <i class="small material-icons icon-purple">
+                                        delete
+                                    </i>
+                                </a>
+
+                                <a class="btn" ng-click="getAverage(student)">
+                                    Average
+                                </a>
+
+
+                            </td>
+                        </tr>
+                        <tr ng-if="studentListFilter.length<=0">
+                            <td>No Students to Display.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- Compiled and minified JavaScript -->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-sanitize.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+<script src="assets/js/ngToast.min.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+    $(document).ready(function(){
+        // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+        $('.modal-trigger').leanModal({
+            dismissible: true, // Modal can be dismissed by clicking outside of the modal
+            opacity: .5, // Opacity of modal background
+            in_duration: 300, // Transition in duration
+            out_duration: 200, // Transition out duration
+            ready: function() {  }, // Callback for Modal open
+            complete: function() {  } // Callback for Modal close
+        });
+
+        $(document).ready(function() {
+            $('select').material_select();
+        });
+    });
+</script>
+</body>
+</html>
