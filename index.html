@@ -5,7 +5,7 @@
     <title>Student Average App - Planlodge</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <link rel="shortcut icon" type="image/png" href="http://pngimg.com/upload/small/apple_PNG12458.png">
+    <link rel="shortcut icon" type="image/png" href="//pngimg.com/upload/apple_PNG12435.png">
     <!--Import Google Icon Font-->
     <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
@@ -131,9 +131,100 @@
         <div id="downloadList" class="modal">
             <div class="modal-content">
                 <h4>Full Roster</h4>
-                <ul>
-                    <li ng-repeat="student in studentList">{{student.first}} {{student.last}}</li>
-                </ul>
+
+                <div class="row">
+                    <div class="col s12">
+
+                        <div class="col s12">
+                            <ul class="tabs">
+                                <li class="tab col s3"><a class="active" href="#table">Table</a></li>
+                                <li class="tab col s3"><a href="#list">List</a></li>
+
+                            </ul>
+                        </div>
+
+                        <div id="list" class="col s12">
+
+                            <a href="#" class=" modal-action waves-effect waves-green btn-flat" ng-click="withScores()">Show Scores</a>
+
+                            <ul>
+                                <li ng-repeat="student in studentList">
+                                    <blockquote>{{student.first}} {{student.last}}</blockquote>
+                                    <p ng-show="scoresB" ng-repeat="test in student.test">Test #{{$index + 1}} <strong>{{test.test_score}}</strong></p>
+                                    <p ng-show="scoresB">Average: {{getAverageCount(student)}}</p>
+                                </li>
+                            </ul>
+
+                        </div>
+                        <div id="table" class="col s12">
+
+                            <div ng-show="searchShow" class="input-field col s12">
+                                <input placeholder="Search Students..." id="" type="text" ng-model="searchP" class="validate">
+                            </div>
+
+                            <table class="highlight responsive-table">
+                                <thead>
+                                <tr>
+                                    <th data-field="id">ID</th>
+                                    <th data-field="id">Name</th>
+                                    <th data-field="price">Test #1</th>
+                                    <th data-field="price">Test #2</th>
+                                    <th data-field="price">Test #3</th>
+                                    <th data-field="price">Test #4</th>
+                                    <th data-field="price">Test #5</th>
+                                    <th data-field="price">Average</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                <tr ng-repeat="student in studentListFilter = (studentList | filter :searchP)">
+                                    <td>{{$index + 1}}</td>
+                                    <td>{{student.first}} {{student.last}}</td>
+                                    <td>
+                                        <span ng-hide="student.editing" ng-dblclick="editStudent(student)">{{student.test[0].test_score || "-"}}</span>
+                                        <span><input required class="validate" style="max-width:40px;" ng-show="student.editing" ng-model="student.test[0].test_score" ng-blur="doneEditing(student, student.test[0].test_score)" autofocus /></span>
+                                    </td>
+                                    <td>
+                                        <span ng-hide="student.editing" ng-dblclick="editStudent(student)">{{student.test[1].test_score || "-"}}</span>
+                                        <span><input required class="validate" style="max-width:40px;" ng-show="student.editing" ng-model="student.test[1].test_score" ng-blur="doneEditing(student, student.test[1].test_score)" autofocus /></span>
+                                    </td>
+                                    <td>
+                                        <span ng-hide="student.editing" ng-dblclick="editStudent(student)">{{student.test[2].test_score || "-"}}</span>
+                                        <span><input required class="validate" style="max-width:40px;" ng-show="student.editing" ng-model="student.test[2].test_score" ng-blur="doneEditing(student, student.test[2].test_score)" autofocus /></span>
+                                    </td>
+                                    <td>
+                                        <span ng-hide="student.editing" ng-dblclick="editStudent(student)">{{student.test[3].test_score || "-"}}</span>
+                                        <span><input required class="validate" style="max-width:40px;" ng-show="student.editing" ng-model="student.test[3].test_score" ng-blur="doneEditing(student, student.test[3].test_score)" autofocus /></span>
+                                    </td>
+                                    <td>
+                                        <span ng-hide="student.editing" ng-dblclick="editStudent(student)">{{student.test[4].test_score || "-"}}</span>
+                                        <span><input required class="validate" style="max-width:40px;" ng-show="student.editing" ng-model="student.test[4].test_score" ng-blur="doneEditing(student, student.test[4].test_score)" autofocus /></span>
+                                    </td>
+
+                                    <td>
+                                        {{getAverageCount(student)}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>-</td>
+                                    <td>Class Average:</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><strong>{{getClassAverageTotal()}}</strong></td>
+                                </tr>
+                                <tr ng-if="studentListFilter.length<=0">
+                                    <td>No Students to Display.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <a href="#" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
@@ -168,7 +259,7 @@
                     <input placeholder="Search Students..." id="" type="text" ng-model="search" class="validate">
                 </div>
 
-                <table class="highlight responsive-table">
+                <table class="highlight">
                     <thead>
                     <tr>
                         <th data-field="id">ID</th>
@@ -211,13 +302,37 @@
     </div>
 </div>
 
+<footer class="page-footer grey">
+    <div class="container">
+        <div class="row">
+            <div class="col l6 s12">
+                <h5 class="white-text">Student Average Application</h5>
+                <p class="grey-text text-lighten-4">Use this application to Add Students along with their test scores, search, delete, and edit scores as well!</p>
+            </div>
+            <div class="col l4 offset-l2 s12">
+                <h5 class="white-text">Links</h5>
+                <ul>
+                    <li><a class="grey-text text-lighten-3" href="https://nodeportfoliojs.herokuapp.com" target="_blank">Node Projects</a></li>
+                    <li><a class="grey-text text-lighten-3" href="https://github.com/planlodge" target="_blank">GitHub</a></li>
+                    <li><a class="grey-text text-lighten-3" href="https://www.linkedin.com/in/jarrodsampson" target="_blank">LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            © 2017 Planlodge - Jarrod Sampson
+            <a class="grey-text text-lighten-4 right" href="http://planlodge.com" target="_blank">Portfolio</a>
+        </div>
+    </div>
+</footer>
+
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <!-- Compiled and minified JavaScript -->
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-sanitize.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
-<script src="assets/js/ngToast.min.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
     $(document).ready(function(){
