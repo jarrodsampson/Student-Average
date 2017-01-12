@@ -22,4 +22,4 @@ AngularJS application styled with MaterializeCSS, based on CodeWars Kata. Design
 
 ## License
 
-Lunch Break Walk is licensed under the [MIT license](http://opensource.org/licenses/MIT).
+Student Averages is licensed under the [MIT license](http://opensource.org/licenses/MIT).
