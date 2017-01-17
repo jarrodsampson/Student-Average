@@ -1,0 +1,19 @@
+[ng\:cloak], [ng-cloak], .ng-cloak {
+    display: none !important;
+}
+
+.wrapper {
+    padding:15px;
+    margin:auto;
+}
+
+.maxer {
+    margin: auto;
+    max-width: 1200px;
+    width: 100%;
+    display:block;
+}
+
+.btn {
+    margin:0.5em !important;
+}

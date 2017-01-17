@@ -1,0 +1,250 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    title Student Average App - Planlodge
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+    link(rel='shortcut icon', type='image/png', href='//pngimg.com/upload/apple_PNG12435.png')
+    // Import Google Icon Font
+    link(href='//fonts.googleapis.com/icon?family=Material+Icons', rel='stylesheet')
+    // Compiled and minified CSS
+    link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css')
+    link(rel='stylesheet', href='/stylesheets/main.css')
+  body(data-ng-app='StudentApp', ng-controller='StudentController', ng-cloak='')
+    .row.wrapper
+      .col.s12.m10.maxer
+        h1 Student Roster
+        // normal buttons
+        .row
+          .col.s12
+            a.waves-effect.waves-light.btn.modal-trigger(href='#add')
+              i.material-icons.left add
+              | Add Student
+            a.waves-effect.waves-light.btn.modal-trigger(ng-class="studentList.length < 1 ? 'disabled' : ''", href='#clear')
+              i.material-icons.left replay
+              | Clear Students
+            a.waves-effect.waves-light.btn.modal-trigger(ng-class="studentList.length < 1 ? 'disabled' : ''", href='#downloadList')
+              i.material-icons.left open_in_browser
+              |                         Full Roster
+            a.waves-effect.waves-light.btn.modal-trigger(ng-click='classAverage()', ng-class="studentList.length < 1 ? 'disabled' : ''", href='#classAverage')
+              i.material-icons.left open_in_browser
+              |                         Class Average
+        // floating vertical action button
+        .row
+          .col.s12
+            #new.fixed-action-btn(style='top: 45px; right: 24px;')
+              a.btn-floating.btn-large.red
+                i.large.material-icons settings
+              ul(style='top: 85px; right: 0;')
+                li
+                  a.btn-floating.red.tooltipped(data-position='left', data-delay='10', data-tooltip='Show/Hide Search Bar', ng-click='hideSearch()')
+                    i.material-icons insert_chart
+        // basic modal
+        // Modal Structure
+        #add.modal
+          .modal-content
+            h4 Add A New Student
+            p Add a new student below.
+            .row
+              form.col.s12
+                .row
+                  .input-field.col.s12
+                    i.material-icons.prefix account_circle
+                    input#first_name.validate(placeholder='Placeholder', type='text', ng-model='newStudent.first')
+                    label(for='first_name') First Name
+                  .input-field.col.s12
+                    i.material-icons.prefix account_circle
+                    input#last_name.validate(type='text', ng-model='newStudent.last')
+                    label(for='last_name') Last Name
+                .row
+                  .input-field.col.s12
+                    i.material-icons.prefix mode_edit
+                    textarea#icon_prefix2.materialize-textarea(length='120', ng-model='newStudent.memo')
+                    label(for='icon_prefix2') Message
+                  input(type='hidden', ng-model='newStudent.tests')
+            div(ng-if='testHolder.length>0')
+              h4 Test Scores:
+            div(ng-repeat='test in testHolder')
+              .row.col.s12.m12
+                .input-field.col.s4.m4
+                  input#test_score.validate(placeholder='Test Score #{{$index + 1}}', ng-model='test.test_score', type='text')
+                .col.s4.m4
+                  br
+                  a.waves-effect.waves-light.btn(ng-show='$last', ng-click='removeScore()')
+                    i.material-icons.medium delete
+            a.waves-effect.waves-light.btn(ng-click='addNewScore()')
+              i.material-icons.medium add
+          .modal-footer
+            a.modal-action.modal-close.waves-effect.waves-green.btn-flat(href='#', ng-click='addStudent(newStudent)') Add
+            a.modal-action.modal-close.waves-effect.waves-green.btn-flat(href='#') Cancel
+        // basic modal
+        // Modal Structure
+        #clear.modal
+          .modal-content
+            h4 Clear Student List
+            p Are you sure you want to clear student list? This cannot be undone.
+          .modal-footer
+            a.modal-action.modal-close.waves-effect.waves-green.btn-flat(href='#', ng-click='clearStudents()') Clear
+            a.modal-action.modal-close.waves-effect.waves-green.btn-flat(href='#') Cancel
+        // basic modal
+        // Modal Structure
+        #downloadList.modal
+          .modal-content
+            h4 Full Roster
+            .row
+              .col.s12
+                .col.s12
+                  ul.tabs
+                    li.tab.col.s3
+                      a.active(href='#table') Table
+                    li.tab.col.s3
+                      a(href='#list') List
+                #list.col.s12
+                  a.modal-action.waves-effect.waves-green.btn-flat(href='#', ng-click='withScores()') Show Scores
+                  ul
+                    li(ng-repeat='student in studentList')
+                      blockquote {{student.first}} {{student.last}}
+                      p(ng-show='scoresB', ng-repeat='test in student.test')
+                        | Test #{$index + 1}
+                        strong {{test.test_score}}
+                      p(ng-show='scoresB') Average: {{getAverageCount(student)}}
+                #table.col.s12
+                  .input-field.col.s12(ng-show='searchShow')
+                    input.validate(placeholder='Search Students...', id='', type='text', ng-model='searchP')
+                  table.highlight.responsive-table
+                    thead
+                      tr
+                        th(data-field='id') ID
+                        th(data-field='id') Name
+                        th(data-field='price') Test #1
+                        th(data-field='price') Test #2
+                        th(data-field='price') Test #3
+                        th(data-field='price') Test #4
+                        th(data-field='price') Test #5
+                        th(data-field='price') Average
+                    tbody
+                      tr(ng-repeat='student in studentListFilter = (studentList | filter :searchP)')
+                        td {{$index + 1}}
+                        td {{student.first}} {{student.last}}
+                        td
+                          span(ng-hide='student.editing', ng-dblclick='editStudent(student)') {{student.test[0].test_score || "-"}}
+                          span
+                            input.validate(required='', style='max-width:40px;', ng-show='student.editing', ng-model='student.test[0].test_score', ng-blur='doneEditing(student, student.test[0].test_score)', autofocus='')
+                        td
+                          span(ng-hide='student.editing', ng-dblclick='editStudent(student)') {{student.test[1].test_score || "-"}}
+                          span
+                            input.validate(required='', style='max-width:40px;', ng-show='student.editing', ng-model='student.test[1].test_score', ng-blur='doneEditing(student, student.test[1].test_score)', autofocus='')
+                        td
+                          span(ng-hide='student.editing', ng-dblclick='editStudent(student)') {{student.test[2].test_score || "-"}}
+                          span
+                            input.validate(required='', style='max-width:40px;', ng-show='student.editing', ng-model='student.test[2].test_score', ng-blur='doneEditing(student, student.test[2].test_score)', autofocus='')
+                        td
+                          span(ng-hide='student.editing', ng-dblclick='editStudent(student)') {{student.test[3].test_score || "-"}}
+                          span
+                            input.validate(required='', style='max-width:40px;', ng-show='student.editing', ng-model='student.test[3].test_score', ng-blur='doneEditing(student, student.test[3].test_score)', autofocus='')
+                        td
+                          span(ng-hide='student.editing', ng-dblclick='editStudent(student)') {{student.test[4].test_score || "-"}}
+                          span
+                            input.validate(required='', style='max-width:40px;', ng-show='student.editing', ng-model='student.test[4].test_score', ng-blur='doneEditing(student, student.test[4].test_score)', autofocus='')
+                        td
+                          | {{getAverageCount(student)}}
+                      tr
+                        td -
+                        td Class Average:
+                        td
+                        td
+                        td
+                        td
+                        td
+                        td
+                          strong {{getClassAverageTotal()}}
+                      tr(ng-if='studentListFilter.length<=0')
+                        td No Students to Display.
+          .modal-footer
+            a.modal-action.modal-close.waves-effect.waves-green.btn-flat(href='#') Close
+        // basic modal
+        // Modal Structure
+        #classAverage.modal
+          .modal-content
+            h4 Class Average
+            p Total Class Average.
+            h4 {{classAverageTotal}}
+          .modal-footer
+            a.modal-action.modal-close.waves-effect.waves-green.btn-flat(href='#') Okay
+        // striped and responsive table
+        .row
+          .col.s12
+            blockquote
+              p
+                | Total:
+                span(ng-if='studentCount == 0') No Students
+                span(ng-if='studentCount == 1') {{studentCount}} Student
+                span(ng-if='studentCount > 1') {{studentCount}} Students
+            .input-field.col.s12(ng-show='searchShow')
+              input.validate(placeholder='Search Students...', id='', type='text', ng-model='search')
+            table.highlight
+              thead
+                tr
+                  th(data-field='id') ID
+                  th(data-field='id') Name
+                  th(data-field='price') Notes
+                  th(data-field='price') Actions
+              tbody
+                tr(ng-repeat='student in studentListFilter = (studentList | filter :search)')
+                  td {{$index + 1}}
+                  td {{student.first}} {{student.last}}
+                  td
+                    span(ng-hide='student.editing', ng-dblclick='editStudent(student)') {{student.memo}}
+                    span
+                      input(ng-show='student.editing', ng-model='student.memo', ng-blur='doneEditing(student)', autofocus='')
+                  td
+                    a.btn(ng-click='removeStudent($index, student)')
+                      i.small.material-icons.icon-purple
+                        | delete
+                    a.btn(ng-click='getAverage(student)')
+                      | Average
+                tr(ng-if='studentListFilter.length<=0')
+                  td No Students to Display.
+    footer.page-footer.grey
+      .container
+        .row
+          .col.l6.s12
+            h5.white-text Student Average Application
+            p.grey-text.text-lighten-4
+              | Use this application to Add Students along with their test scores, search, delete, and edit scores as well!
+          .col.l4.offset-l2.s12
+            h5.white-text Links
+            ul
+              li
+                a.grey-text.text-lighten-3(href='https://nodeportfoliojs.herokuapp.com', target='_blank') Node Projects
+              li
+                a.grey-text.text-lighten-3(href='https://github.com/planlodge', target='_blank') GitHub
+              li
+                a.grey-text.text-lighten-3(href='https://www.linkedin.com/in/jarrodsampson', target='_blank') LinkedIn
+      .footer-copyright
+        .container
+          | © 2017 Planlodge - Jarrod Sampson
+          a.grey-text.text-lighten-4.right(href='http://planlodge.com', target='_blank') Portfolio
+    script(src='//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js')
+    // Compiled and minified JavaScript
+    script(src='//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js')
+    script(src='//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-sanitize.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js')
+    script(src='/js/app.js')
+    script.
+      $(document).ready(function(){
+        // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+        $('.modal-trigger').leanModal({
+          dismissible: true, // Modal can be dismissed by clicking outside of the modal
+          opacity: .5, // Opacity of modal background
+          in_duration: 300, // Transition in duration
+          out_duration: 200, // Transition out duration
+          ready: function() {  }, // Callback for Modal open
+          complete: function() {  } // Callback for Modal close
+        });
+        $(document).ready(function() {
+          $('select').material_select();
+        });
+      });
