@@ -5,6 +5,8 @@ AngularJS application styled with MaterializeCSS, based on CodeWars Kata. Design
 [![Build Status](https://travis-ci.org/stevenbenner/jquery-powertip.svg?branch=master)](https://travis-ci.org/stevenbenner/jquery-powertip)
 ![License](https://img.shields.io/packagist/l/doctrine/orm.svg)
 
+![Image](https://github.com/planlodge/Student-Average/blob/master/public/img/screen.png?raw=true)
+
 ## Description
 
 > It's the academic year's end, fateful moment of your school report. The averages must be calculated. All the students come to you and entreat you to calculate their average for them.
